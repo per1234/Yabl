@@ -3,7 +3,7 @@
 
 namespace Yabl {
 
-void Button::update() {
+bool Button::update() {
   unsigned long elasped = millis() - previous_millis;
 
   if (!gestureStarted()) {
@@ -21,7 +21,7 @@ void Button::update() {
   if (pressed()) {
     triggerEvent(PRESS);
       
-    if (gestureIncludes(RELEASE) && elasped < _doubleTapTime) {
+    if (gestureIncludes(RELEASE) && elasped < _doubleTapInterval) {
       triggerEvent(DOUBLE_TAP);
     }
   }
@@ -43,16 +43,18 @@ void Button::update() {
     }
   }
   else if (down()) {
-    if (gestureStarted() && !gestureIncludes(HOLD) && !gestureIncludes(RELEASE) && elasped >= _holdTime) {
+    if (gestureStarted() && !gestureIncludes(HOLD) && !gestureIncludes(RELEASE) && elasped >= _holdDuration) {
       triggerEvent(HOLD);
     }
   }
   else {
-    if (gestureIncludes(PRESS) && elasped >= _doubleTapTime) {
+    if (gestureIncludes(PRESS) && elasped >= _doubleTapInterval) {
       triggerEvent(SINGLE_TAP);
       _reset = true;
     }
   }
+  
+  return activity();
 }
 
 void Button::reset()
@@ -82,7 +84,7 @@ void Button::triggerEvent(Event event) {
   }
 }
 
-void Button::setCallback(CallbackSimple callback, Event forEvents) {
+void Button::callback(CallbackSimple callback, Event forEvents) {
   for (int i = 0; i < EVENT_COUNT; ++i) {
     if (forEvents & (1 << i)) {
       _callbacks[i].type = Callback::SIMPLE;
@@ -91,7 +93,7 @@ void Button::setCallback(CallbackSimple callback, Event forEvents) {
   }
 }
 
-void Button::setCallback(CallbackWithButtonAndEvent callback, Event forEvents) {
+void Button::callback(CallbackWithButtonAndEvent callback, Event forEvents) {
   for (int i = 0; i < EVENT_COUNT; ++i) {
     if (forEvents & (1 << i)) {
       _callbacks[i].type = Callback::WITH_BUTTON_AND_EVENT;

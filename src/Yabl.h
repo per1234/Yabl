@@ -14,7 +14,7 @@ static constexpr Event SINGLE_TAP = 0x08;
 static constexpr Event DOUBLE_TAP = 0x10;
 static constexpr Event HOLD = 0x20;
 static constexpr Event LONG_RELEASE = 0x40;
-static constexpr Event USER_EVENT = 0x80;
+static constexpr Event USER_EVENT = 0x100;
 static constexpr Event ALL_EVENTS = 0xFFFF;
 
 class Button : public Bounce
@@ -25,7 +25,7 @@ public:
   
   Button() {}
 
-  void update();
+  bool update();
   void reset();
   void sleep() { reset(); }
   void wakeup();
@@ -35,21 +35,23 @@ public:
   bool released() { return _inverted ? rose() : fell(); }
   bool activity() const { return _currentEvents != 0; }
   bool triggered(Event event) const { return _currentEvents & event; }
-  void triggerUserEvent() { triggerEvent(USER_EVENT); }
   bool gestureStarted() const { return _gestureEvents != 0; }
   bool gestureIncludes(Event event) const { return _gestureEvents & event; }
   void suppressOnce(Event event) { _suppressEvents |= event; }
   
-  void setHoldTime(unsigned int ms) { _holdTime = ms; }
-  unsigned int holdTime() const { return _holdTime; }
-  void setDoubleTapTime(unsigned int ms) { _doubleTapTime = ms; }
-  unsigned int doubleTapTime() const { return _doubleTapTime; }
-  void setInverted(bool inverted) { _inverted = inverted; }
+  void holdDuration(unsigned int ms) { _holdDuration = ms; }
+  unsigned int holdDuration() const { return _holdDuration; }
+  void doubleTapInterval(unsigned int ms) { _doubleTapInterval = ms; }
+  unsigned int doubleTapInterval() const { return _doubleTapInterval; }
+  void inverted(bool inverted) { _inverted = inverted; }
   bool inverted() const { return _inverted; }
-  void setCallback(CallbackSimple callback, Event forEvents);
-  void setCallback(CallbackWithButtonAndEvent callback, Event forEvents = ALL_EVENTS);
+  void callback(CallbackSimple callback, Event forEvents);
+  void callback(CallbackWithButtonAndEvent callback, Event forEvents = ALL_EVENTS);
 
   bool operator==(const Button& other) const { return this == &other; }
+
+protected:
+  void triggerEvent(Event event);
   
 private:
   struct Callback {
@@ -65,14 +67,13 @@ private:
     } callback;
   };
   
-  void triggerEvent(Event event);
   void clearEvents() { _currentEvents = 0; }
 
   static constexpr int EVENT_COUNT = sizeof(Event) * 8;
 
   bool _inverted = true;
-  unsigned int _holdTime = 400;
-  unsigned int _doubleTapTime = 150;
+  unsigned int _holdDuration = 400;
+  unsigned int _doubleTapInterval = 150;
   bool _reset = false;
   Event _currentEvents = 0;
   Event _gestureEvents = 0;
