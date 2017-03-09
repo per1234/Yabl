@@ -8,13 +8,27 @@ This library augments the popular debounce library [Bounce2](https://github.com/
 * Tap
 * Double-tap
 
-## Using callbacks
-This starts off the same way as setting up [Bounce2](https://github.com/thomasfredericks/Bounce2). To set up a button on pin 6 and set a callback for button press and release events:
+## Setting up and reading the button state
+Setting up the button starts off the same way as setting up [Bounce2](https://github.com/thomasfredericks/Bounce2). To set up a button on pin 6, set the pin mode to pull-up and check whether it is initially pressed down:
 ```c++
 Button button;
 
 void setup() {
-  button.attach(6);
+  button.attach(6, INPUT_PULLUP);
+  
+  if (button.down()) {
+    // button is down while switching on, prompt user to perform a factory reset
+    factoryResetPrompt();
+  }
+}
+```
+`Button` assumes the switch is normally-open and connected to ground which means pressing it will cause the pin to go `LOW`. This is the default _inverted_ mode. If, on the other hand, the pin is set up to go `HIGH` when the button is pressed, call `button.inverted(false)` in `setup()`.
+
+## Using callbacks
+To set up a callback for button press and release events:
+```c++
+void setup() {
+  button.attach(6, INPUT_PULLUP);
   button.callback(onButtonPress, PRESS);
   button.callback(onButtonRelease, RELEASE);
 }
@@ -34,10 +48,10 @@ void loop() {
   // ...
 }
 ```
-Callbacks can be also be added for the events `SHORT_RELEASE`, `LONG_RELEASE`, `HOLD`, `SINGLE_TAP` and `DOUBLE_TAP`. In fact, sometimes you may want to have a single callback to handle all events:
+Callbacks can be also be added for the events `SHORT_RELEASE`, `LONG_RELEASE`, `HOLD`, `SINGLE_TAP` and `DOUBLE_TAP`. In fact, sometimes you may want to have a single callback handle all events:
 ```c++
 void setup() {
-  button.attach(6);
+  button.attach(6, INPUT_PULLUP);
   button.callback(onButtonEvent);
 }
 
@@ -53,8 +67,10 @@ void onButtonEvent(Button& button, Event event) {
 ## Checking for events
 An alternative to using callbacks is to check the button for activity after each `update()`:
 ```c++
+Button button;
+
 void setup() {
-  button.attach(6);
+  button.attach(6, INPUT_PULLUP);
 }
 
 void update() {
@@ -67,5 +83,15 @@ void update() {
     else if (button.triggered(HOLD))
       // ...
   }
+}
+```
+`Button` also has two convenience functions for checking if a button was pressed or released:
+```c++
+void update() {
+  button.update();
+  if (button.pressed())
+    digitalWrite(LED_BUILTIN, HIGH);
+  else if (button.released())
+    digitalWrite(LED_BUILTIN, LOW);
 }
 ```
