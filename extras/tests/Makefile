@@ -12,7 +12,7 @@
 # project, except GTEST_HEADERS, which you can use in your own targets
 # but shouldn't modify.
 
-GTEST_DIR = ./googletest/googletest
+GTEST_DIR = googletest/googletest
 
 # Points to the root of Google Mock, relative to where this file is.
 # Remember to tweak this if you move this file.
@@ -28,7 +28,7 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GMOCK_DIR)/include \
             -isystem mocks -isystem $(USER_DIR) -DTEST
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread -std=c++0x -Qunused-arguments
+CXXFLAGS += -g -Wall -Wextra -pthread -std=c++0x
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
