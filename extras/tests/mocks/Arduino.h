@@ -8,6 +8,6 @@ unsigned long millis() {
   return _millis;
 }
 
-}
+} // namespace Arduino
 
 using namespace Arduino;
