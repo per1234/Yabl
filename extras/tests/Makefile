@@ -28,7 +28,7 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GMOCK_DIR)/include \
             -isystem mocks -isystem $(USER_DIR) -DTEST
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread -std=c++0x -Qunused-arguments
+CXXFLAGS += -g -Wall -Wextra -pthread -std=c++0x
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -93,10 +93,10 @@ gmock_main.a : gmock-all.o gtest-all.o gmock_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-Yabl.o : $(USER_DIR)/Yabl.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS)
+Yabl.o : $(USER_DIR)/Yabl.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS) $(MOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Yabl.cpp
 
-YablTest.o : YablTest.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS) $(MOCK_HEADERS)
+YablTest.o : YablTest.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c YablTest.cpp
 
 YablTest : Yabl.o YablTest.o gmock_main.a

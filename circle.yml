@@ -1,7 +1,9 @@
-dependencies:
-  override:
-    - cd extras/tests; make
 test:
+  pre:
+    - cd extras/tests; make
   override:
-    - ./YablTest
-
+    - ./extras/tests/YablTest
+checkout:
+  post:
+    - git submodule init
+    - git submodule update
