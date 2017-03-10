@@ -1,5 +1,5 @@
 #include "Yabl.h"
-#include "Arduino.h"
+#include <Arduino.h>
 
 namespace Yabl {
 
@@ -27,7 +27,7 @@ bool Button::update() {
   }
   else if (released()) {
     if (!gestureStarted()) {
-      return;
+      return false;
     }
     triggerEvent(RELEASE);
       
