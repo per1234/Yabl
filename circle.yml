@@ -1,6 +1,7 @@
 dependencies:
   override:
-    - cd extras/tests; make
+    - cd extras/tests
+    - make
 test:
   override:
     - ./YablTest
