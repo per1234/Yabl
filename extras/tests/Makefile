@@ -93,10 +93,10 @@ gmock_main.a : gmock-all.o gtest-all.o gmock_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-Yabl.o : $(USER_DIR)/Yabl.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS)
+Yabl.o : $(USER_DIR)/Yabl.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS) $(MOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Yabl.cpp
 
-YablTest.o : YablTest.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS) $(MOCK_HEADERS)
+YablTest.o : YablTest.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c YablTest.cpp
 
 YablTest : Yabl.o YablTest.o gmock_main.a
