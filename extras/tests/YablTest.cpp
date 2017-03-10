@@ -1,4 +1,4 @@
-#include "../../src/Yabl.h"
+#include <Yabl.h>
 #include <gtest/gtest.h>
 
 TEST(YablTest, initialUpState) {
