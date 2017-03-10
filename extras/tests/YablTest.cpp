@@ -23,6 +23,6 @@ TEST(YablTest, initiaDownState) {
   
   EXPECT_TRUE(button.inverted());
   EXPECT_FALSE(button.read());
-  EXPECT_TRUE(button.down());
+  EXPECT_FALSE(button.down());
   EXPECT_FALSE(button.activity());
 }
