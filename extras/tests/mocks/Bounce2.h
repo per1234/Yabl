@@ -1,16 +1,14 @@
+#include "gmock/gmock.h"
+
 class Bounce
 {
 public:
-  void attach(int pin) {
-    this->pin = pin;
-  }
-  void attach(int pin, int /*mode*/) {
-    this->pin = pin;
-  }
-  bool update() { return false; }
-  bool read() { return true; }
-  bool rose() { return false; }
-  bool fell() { return false; }
+  MOCK_METHOD1(attach, void(int pin));
+  MOCK_METHOD2(attach, void(int pin, int mode));
+  MOCK_METHOD0(update, bool());
+  MOCK_METHOD0(read, bool());
+  MOCK_METHOD0(rose, bool());
+  MOCK_METHOD0(fell, bool());
   
 protected:
   unsigned long previous_millis = 0;
