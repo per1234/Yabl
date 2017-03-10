@@ -1,4 +1,4 @@
-# Yabl
+# Yabl [![CircleCI](https://circleci.com/gh/yergin/Yabl.svg?style=svg&circle-token=1b0a9ea68cca27109b3fce1641529184d060c373)](https://circleci.com/gh/yergin/Yabl)
 Yet Another Button Library (for Arduino).
 
 This library augments the popular debounce library [Bounce2](https://github.com/thomasfredericks/Bounce2) with the ability to set callbacks or easily check for the following button events:
