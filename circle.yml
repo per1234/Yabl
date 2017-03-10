@@ -1,0 +1,9 @@
+dependencies:
+  pre:
+    - cd extras/tests;
+  override:
+    - make
+test:
+  override:
+    - ./YablTest
+
