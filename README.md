@@ -9,8 +9,11 @@ This library augments the popular debounce library [Bounce2](https://github.com/
 * Double-tap
 
 ## Setting up and reading the button state
-Setting up the button starts off the same way as setting up [Bounce2](https://github.com/thomasfredericks/Bounce2). To set up a button on pin 6, set the pin mode to pull-up and check whether it is initially pressed down:
+Setting up the button starts off the same way as setting up with [Bounce2](https://github.com/thomasfredericks/Bounce2). Here is how you would set up a button on pin 6, set the pin mode to pull-up and check whether it is initially pressed down:
 ```c++
+#include <Arduino.h>
+#include <Yabl.h>
+
 Button button;
 
 void setup() {
@@ -25,7 +28,7 @@ void setup() {
 `Button` assumes the switch is normally-open and connected to ground which means pressing it will cause the pin to go `LOW`. This is the default _inverted_ mode. If, on the other hand, the pin is set up to go `HIGH` when the button is pressed, call `button.inverted(false)` in `setup()`.
 
 ## Using callbacks
-To set up a callback for button press and release events:
+The following code snippet sets up a callback for button press and release events:
 ```c++
 void setup() {
   button.attach(6, INPUT_PULLUP);
