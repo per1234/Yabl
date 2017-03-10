@@ -4,4 +4,7 @@ dependencies:
 test:
   override:
     - ./YablTest
-
+checkout:
+  post:
+    - git submodule init
+    - git submodule update
