@@ -34,7 +34,8 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++0x
 # created to the list.
 TESTS = YablTest
 
-MOCK_HEADERS = ./mocks/*.h
+MOCK_DIR = ./mocks
+MOCK_HEADERS = $(MOCK_DIR)/*.h
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -96,8 +97,11 @@ gmock_main.a : gmock-all.o gtest-all.o gmock_main.o
 Yabl.o : $(USER_DIR)/Yabl.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS) $(MOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Yabl.cpp
 
+Arduino.o : $(MOCK_DIR)/Arduino.cpp $(MOCK_DIR)/Arduino.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(MOCK_DIR)/Arduino.cpp
+
 YablTest.o : YablTest.cpp $(USER_DIR)/Yabl.h $(GMOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c YablTest.cpp
 
-YablTest : Yabl.o YablTest.o gmock_main.a
+YablTest : Yabl.o Arduino.o YablTest.o gmock_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@

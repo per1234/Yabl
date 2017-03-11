@@ -1,13 +1,17 @@
 #pragma once
 
-namespace Arduino {
+#include "gmock/gmock.h"
 
-unsigned long _millis = 0;
+class ArduinoMock
+{
+public:
+  MOCK_METHOD0(millis, unsigned long());
+};
 
-unsigned long millis() {
-  return _millis;
-}
+#define DECLARE_MOCK_ARDUINO(_mockArduino) \
+  ArduinoMock _mockArduino; \
+  SET_MOCK_ARDUINO(_mockArduino);
 
-} // namespace Arduino
+void SET_MOCK_ARDUINO(ArduinoMock& arduino);
 
-using namespace Arduino;
+unsigned long millis();
