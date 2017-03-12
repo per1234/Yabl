@@ -7,8 +7,19 @@
 
 #include "Arduino.h"
 
-ArduinoMock* _arduino = 0;
-
-void SET_MOCK_ARDUINO(ArduinoMock& arduino) { _arduino = &arduino; }
+MockArduino* _arduino = 0;
 
 unsigned long millis() { return _arduino ? _arduino->millis() : 0; }
+
+void CREATE_MOCK_ARDUINO() {
+  _arduino = new MockArduino;
+}
+
+void DESTROY_MOCK_ARDUINO() {
+  delete _arduino;
+  _arduino = 0;
+}
+
+MockArduino& ARDUINO() {
+  return *_arduino;
+}

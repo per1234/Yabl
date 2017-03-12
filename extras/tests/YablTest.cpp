@@ -11,9 +11,37 @@
 
 using ::testing::Return;
 
-TEST(YablTest, initialUpState) {
-  Button button;
+class YablTest : public ::testing::Test
+{
+protected:
+  virtual void SetUp() {
+    CREATE_MOCK_ARDUINO();
+  }
   
+  virtual void TearDown() {
+    DESTROY_MOCK_ARDUINO();
+  }
+  
+  void SET_MILLIS(unsigned long millis) {
+    ON_CALL(ARDUINO(), millis()).WillByDefault(Return(millis));
+    button.previous_millis = _previousMillis;
+    _previousMillis = millis;
+  }
+  
+  void SET_READ_ROSE_FELL(bool read, bool rose, bool fell) {
+    ON_CALL(button, read()).WillByDefault(Return(read));
+    ON_CALL(button, rose()).WillByDefault(Return(rose));
+    ON_CALL(button, fell()).WillByDefault(Return(fell));
+  }
+  
+  Button button;
+
+private:
+  unsigned long _previousMillis = 0;
+};
+
+
+TEST_F(YablTest, initialUpState) {
   EXPECT_CALL(button, read())
     .WillRepeatedly(Return(true));
 
@@ -23,9 +51,8 @@ TEST(YablTest, initialUpState) {
   EXPECT_FALSE(button.activity());
 }
 
-TEST(YablTest, initialDownState) {
-  Button button;
-  
+
+TEST_F(YablTest, initialDownState) {
   EXPECT_CALL(button, read())
     .WillRepeatedly(Return(false));
   
@@ -35,13 +62,35 @@ TEST(YablTest, initialDownState) {
   EXPECT_FALSE(button.activity());
 }
 
-TEST(YablTest, updateCallsMillis) {
-  DECLARE_MOCK_ARDUINO(Arduino);
-  
-  Button button;
-  
-  EXPECT_CALL(Arduino, millis())
-    .WillOnce(Return(10));
-  
+
+TEST_F(YablTest, pressRelease) {
+  SET_MILLIS(100);
+  SET_READ_ROSE_FELL(HIGH, false, false);
   EXPECT_FALSE(button.update());
+  EXPECT_FALSE(button.pressed());
+  EXPECT_FALSE(button.released());
+
+  SET_MILLIS(200);
+  SET_READ_ROSE_FELL(LOW, false, true);
+  EXPECT_TRUE(button.update());
+  EXPECT_TRUE(button.pressed());
+  EXPECT_FALSE(button.released());
+
+  SET_MILLIS(300);
+  SET_READ_ROSE_FELL(LOW, false, false);
+  EXPECT_FALSE(button.update());
+  EXPECT_FALSE(button.pressed());
+  EXPECT_FALSE(button.released());
+  
+  SET_MILLIS(400);
+  SET_READ_ROSE_FELL(HIGH, true, false);
+  EXPECT_TRUE(button.update());
+  EXPECT_FALSE(button.pressed());
+  EXPECT_TRUE(button.released());
+  
+  SET_MILLIS(500);
+  SET_READ_ROSE_FELL(HIGH, false, false);
+  EXPECT_FALSE(button.update());
+  EXPECT_FALSE(button.pressed());
+  EXPECT_FALSE(button.released());
 }
