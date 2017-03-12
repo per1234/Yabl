@@ -98,3 +98,5 @@ void update() {
     digitalWrite(LED_BUILTIN, LOW);
 }
 ```
+## License
+This code is available under the [MIT License](http://opensource.org/licenses/mit-license.php).
