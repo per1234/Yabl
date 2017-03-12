@@ -1,3 +1,10 @@
+/*
+ * Yet Another Button Library (for Arduino)
+ * https://github.com/yergin/Yabl
+ * Copyright 2017 Gino Bollaert
+ * MIT License (https://opensource.org/licenses/mit-license.php)
+ */
+
 #include <Yabl.h>
 #include <Arduino.h>
 #include <gtest/gtest.h>
