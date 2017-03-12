@@ -11,7 +11,7 @@
 namespace Yabl {
 
 bool Button::update() {
-  unsigned long elasped = millis() - previous_millis;
+  unsigned long elasped = millis() - previousMillis();
 
   if (!gestureStarted()) {
     _suppressEvents = 0;

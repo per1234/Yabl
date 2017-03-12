@@ -59,6 +59,7 @@ public:
 
 protected:
   void triggerEvent(Event event);
+  unsigned long previousMillis() const { return previous_millis; }
   
 private:
   struct Callback {

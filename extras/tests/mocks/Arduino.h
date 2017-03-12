@@ -9,16 +9,17 @@
 
 #include "gmock/gmock.h"
 
-class ArduinoMock
+#define HIGH true
+#define LOW false
+
+class MockArduino
 {
 public:
   MOCK_METHOD0(millis, unsigned long());
 };
 
-#define DECLARE_MOCK_ARDUINO(_mockArduino) \
-  ArduinoMock _mockArduino; \
-  SET_MOCK_ARDUINO(_mockArduino);
-
-void SET_MOCK_ARDUINO(ArduinoMock& arduino);
-
 unsigned long millis();
+
+void CREATE_MOCK_ARDUINO();
+void DESTROY_MOCK_ARDUINO();
+MockArduino& ARDUINO();

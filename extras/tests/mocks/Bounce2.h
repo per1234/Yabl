@@ -19,7 +19,5 @@ public:
   MOCK_METHOD0(rose, bool());
   MOCK_METHOD0(fell, bool());
   
-protected:
   unsigned long previous_millis = 0;
-  int pin = 0;
 };
