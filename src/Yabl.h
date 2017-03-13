@@ -76,6 +76,7 @@ private:
   };
   
   void clearEvents() { _currentEvents = 0; }
+  Callback* callback(Event forEvent);
 
   static constexpr int EVENT_COUNT = sizeof(Event) * 8;
 
@@ -86,7 +87,7 @@ private:
   Event _currentEvents = 0;
   Event _gestureEvents = 0;
   Event _suppressEvents = 0;
-  Callback _callbacks[EVENT_COUNT] = {};
+  Callback _callbacks[EVENT_COUNT];
 };
 
 } // namespace Yabl

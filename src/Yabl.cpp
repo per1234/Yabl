@@ -83,12 +83,23 @@ void Button::triggerEvent(Event event) {
   
   _currentEvents |= event;
   _gestureEvents |= event;
-
-  switch (_callbacks[event].type) {
-    case Callback::SIMPLE: (_callbacks[event].callback.simple)(); break;
-    case Callback::WITH_BUTTON_AND_EVENT: (_callbacks[event].callback.withButtonAndEvent)(*this, event); break;
+  
+  Callback* cb = callback(event);
+  switch (cb->type) {
+    case Callback::SIMPLE: (cb->callback.simple)(); break;
+    case Callback::WITH_BUTTON_AND_EVENT: (cb->callback.withButtonAndEvent)(*this, event); break;
     case Callback::NONE: break;
   }
+}
+  
+Button::Callback* Button::callback(Event forEvent) {
+  for (int i = 0; i < EVENT_COUNT; ++i) {
+    if (forEvent & (1 << i)) {
+      return _callbacks + i;
+    }
+  }
+  
+  return 0;
 }
 
 void Button::callback(CallbackSimple callback, Event forEvents) {
