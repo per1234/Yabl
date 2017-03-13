@@ -9,7 +9,18 @@
 
 #include "gmock/gmock.h"
 
-class Bounce
+class BounceInterface
+{
+public:
+  virtual void attach(int pin) = 0;
+  virtual void attach(int pin, int mode) = 0;
+  virtual bool update() = 0;
+  virtual bool read() = 0;
+  virtual bool rose() = 0;
+  virtual bool fell() = 0;
+};
+
+class Bounce : ::testing::NiceMock<BounceInterface>
 {
 public:
   MOCK_METHOD1(attach, void(int pin));
