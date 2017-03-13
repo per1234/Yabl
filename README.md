@@ -11,7 +11,6 @@ This library augments the popular debounce library [Bounce2](https://github.com/
 ## Setting up and reading the button state
 Setting up the button starts off the same way as setting up with [Bounce2](https://github.com/thomasfredericks/Bounce2). Here is how you would set up a button on pin 6, set the pin mode to pull-up and check whether it is initially pressed down:
 ```c++
-#include <Arduino.h>
 #include <Yabl.h>
 
 Button button;
