@@ -43,6 +43,18 @@ protected:
     _millis = millis;
   }
   
+  void EXPECT_EVENTS(Event events) {
+    for (unsigned int i = 0; i < sizeof(Event) * 8; ++i) {
+      Event event = 1 << i;
+      if (events & event) {
+        EXPECT_TRUE(button.triggered(event)) << "event = " << event;
+      }
+      else {
+        EXPECT_FALSE(button.triggered(event)) << "event = " << event;
+      }
+    }
+  }
+  
   void VERIFY_AND_CLEAR() {
     Mock::VerifyAndClear(&button);
     Mock::VerifyAndClear(&callback);
@@ -69,6 +81,7 @@ private:
 };
 
 ButtonCallback* YablTest::callbackPtr = 0;
+
 
 TEST_F(YablTest, initialUpState) {
   EXPECT_CALL(button, read())
@@ -127,28 +140,22 @@ TEST_F(YablTest, pressRelease) {
 TEST_F(YablTest, singleTapEvent) {
   SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(PRESS));
-  EXPECT_FALSE(button.triggered(RELEASE | SHORT_RELEASE | SINGLE_TAP | DOUBLE_TAP | HOLD |
-                                LONG_RELEASE | USER_EVENT));
+  EXPECT_EVENTS(PRESS);
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 200);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(RELEASE | SHORT_RELEASE));
-  EXPECT_FALSE(button.triggered(PRESS | SINGLE_TAP | DOUBLE_TAP | HOLD | LONG_RELEASE |
-                                USER_EVENT));
+  EXPECT_EVENTS(RELEASE | SHORT_RELEASE);
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 300);
   EXPECT_FALSE(button.update());
-  EXPECT_FALSE(button.triggered(ALL_EVENTS));
+  EXPECT_EVENTS(0);
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 400);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(SINGLE_TAP));
-  EXPECT_FALSE(button.triggered(PRESS | RELEASE | SHORT_RELEASE | DOUBLE_TAP | HOLD |
-                                LONG_RELEASE | USER_EVENT));
+  EXPECT_EVENTS(SINGLE_TAP);
   VERIFY_AND_CLEAR();
 }
 
@@ -156,31 +163,22 @@ TEST_F(YablTest, singleTapEvent) {
 TEST_F(YablTest, doubleTapEvent) {
   SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(PRESS));
-  EXPECT_FALSE(button.triggered(RELEASE | SHORT_RELEASE | SINGLE_TAP | DOUBLE_TAP | HOLD |
-                                LONG_RELEASE | USER_EVENT));
+  EXPECT_EVENTS(PRESS);
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 200);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(RELEASE | SHORT_RELEASE));
-  EXPECT_FALSE(button.triggered(PRESS | SINGLE_TAP | DOUBLE_TAP | HOLD | LONG_RELEASE |
-                                USER_EVENT));
+  EXPECT_EVENTS(RELEASE | SHORT_RELEASE);
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(LOW, 300);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(PRESS));
-  EXPECT_TRUE(button.triggered(DOUBLE_TAP));
-  EXPECT_FALSE(button.triggered(RELEASE | SHORT_RELEASE | SINGLE_TAP | HOLD | LONG_RELEASE |
-                                USER_EVENT));
+  EXPECT_EVENTS(PRESS | DOUBLE_TAP);
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 400);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(RELEASE | SHORT_RELEASE));
-  EXPECT_FALSE(button.triggered(PRESS | SINGLE_TAP | DOUBLE_TAP | HOLD | LONG_RELEASE |
-                                USER_EVENT));
+  EXPECT_EVENTS(RELEASE);
   VERIFY_AND_CLEAR();
 }
 
@@ -188,29 +186,22 @@ TEST_F(YablTest, doubleTapEvent) {
 TEST_F(YablTest, holdEvent) {
   SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(PRESS));
-  EXPECT_FALSE(button.triggered(RELEASE | SHORT_RELEASE | SINGLE_TAP | DOUBLE_TAP | HOLD |
-                                LONG_RELEASE | USER_EVENT));
+  EXPECT_EVENTS(PRESS);
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(LOW, 300);
   EXPECT_FALSE(button.update());
-  EXPECT_FALSE(button.triggered(ALL_EVENTS));
+  EXPECT_EVENTS(0);
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(LOW, 500);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(HOLD));
-  EXPECT_FALSE(button.triggered(PRESS | RELEASE | SHORT_RELEASE | SINGLE_TAP | DOUBLE_TAP |
-                                LONG_RELEASE | USER_EVENT));
+  EXPECT_EVENTS(HOLD);
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 700);
   EXPECT_TRUE(button.update());
-  EXPECT_TRUE(button.triggered(RELEASE));
-  EXPECT_TRUE(button.triggered(LONG_RELEASE));
-  EXPECT_FALSE(button.triggered(PRESS | SHORT_RELEASE | SINGLE_TAP | DOUBLE_TAP | HOLD |
-                                USER_EVENT));
+  EXPECT_EVENTS(RELEASE | LONG_RELEASE);
   VERIFY_AND_CLEAR();
 }
 
