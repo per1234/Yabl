@@ -1,8 +1,10 @@
 /*
+ * =============================================================================
  * Yet Another Button Library (for Arduino)
  * https://github.com/yergin/Yabl
  * Copyright 2017 Gino Bollaert
  * MIT License (https://opensource.org/licenses/mit-license.php)
+ * -----------------------------------------------------------------------------
  */
 
 #pragma once
@@ -10,21 +12,46 @@
 #include <Bounce2.h>
 #include <cinttypes>
 
+/*
+ * -----------------------------------------------------------------------------
+ * The Yabl namespace prevents name colisions with other possible Button and
+ * Event classed.
+ */
 namespace Yabl {
 
+/*
+ * -----------------------------------------------------------------------------
+ * The following `Event` type and constants describe events the `Button` class
+ * detects. These events can often be combined using a bit-wise OR when passed
+ * as parameters to `Button` class methods. See `Button` class method comments.
+ */
 typedef uint16_t Event;
 
+/* pressed */
 static constexpr Event PRESS = 0x01;
+/* released */
 static constexpr Event RELEASE = 0x02;
+/* released before `holdDuration` */
 static constexpr Event SHORT_RELEASE = 0x04;
+/* relased (short) and not pressed again before `doubleTapInterval` */
 static constexpr Event SINGLE_TAP = 0x08;
+/* elased (short) and pressed again within `doubleTapInterval` */
 static constexpr Event DOUBLE_TAP = 0x10;
-static constexpr Event HOLD = 0x20;
+/* pressed and held for `holdDuration` */
+static constexpr Event HOLD = 0x20;           
+/* relased after being held for at least `holdDuration` */
 static constexpr Event LONG_RELEASE = 0x40;
+/* additional events for subclasses can start here */
 static constexpr Event USER_EVENT = 0x100;
+/* mask for all events */
 static constexpr Event ALL_EVENTS = 0xFFFF;
 
-
+/*
+ * -----------------------------------------------------------------------------
+ * The `EventInfo` struct is passed as a parameter to event callbacks specifying
+ * the button and type of event triggered.
+ */
+  
 class Button;
 
 struct EventInfo {
@@ -33,10 +60,42 @@ struct EventInfo {
   bool operator==(const EventInfo& other) const;
 };
 
-
+/*
+ * =============================================================================
+ * The `Button` class is the main class and represents a physical button
+ * attached to the board. It subclasses Bounce and therefore all public Bounce
+ * methods such as `attach(...)` and `interval()` are available to the user of
+ * this class. `read()`, `fell()` and `rose()` are also available but the
+ * methods `down()`, `pressed()` and `released()` are preferred as they are more
+ * meaningful when describing a button state or event.
+ * 
+ * Example of use:
+ *
+ *   Button button;
+ *
+ *   // Specify the pin the button is attached to using the `Bounce` method
+ *   //`attach(...):
+ *   void setup() {
+ *     button.attach(6, INPUT_PULLUP); // button attached to pin 6 and ground
+ *   }
+ *
+ *   // respond to button events in the main loop
+ *   void loop() {
+ *     button.update(); // update button state 
+ *     if (button.pressed()) {
+ *       // respond to button press here...
+ *     }
+ *   }
+ * -----------------------------------------------------------------------------
+ */
+  
 class Button : public Bounce
 {
 public:
+  /*
+   * There are two possibile function signitures for callbacks. See comments for
+   * both `callback(...)` methods below.
+   */
   typedef void (*CallbackSimple)();
   typedef void (*CallbackWithEventInfo)(const EventInfo&);
   
@@ -62,6 +121,32 @@ public:
   unsigned int doubleTapInterval() const { return _doubleTapInterval; }
   void inverted(bool inverted) { _inverted = inverted; }
   bool inverted() const { return _inverted; }
+  
+  /*
+   * Callbacks with signiture `CallbackSimple` have no arguments and are
+   * typically used when there is one button and seperate callbacks per-event.
+   * Multiple events can be linked to the same callback by combining events
+   * using the bit-wise OR operator. For example:
+   *
+   *   void setup() {
+   *     ...
+   *     button.callback(onButtonTap, SINGLE_TAP | HOLD);
+   *     button.callback(onButtonDoubleTap, DOUBLE_TAP);
+   *   }
+   *   
+   *   void onButtonTap() {
+   *     // respond to button tap here...
+   *   }
+   *
+   *   void onButtonDoubleTap() {
+   *     // respond to button double-tap here...
+   *   }
+   *   
+   *   void loop() {
+   *     button.update();
+   *     ...
+   *   }
+   */
   void callback(CallbackSimple callback, Event forEvents);
   void callback(CallbackWithEventInfo callback, Event forEvents = ALL_EVENTS);
 
