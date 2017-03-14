@@ -13,7 +13,6 @@
 using ::testing::Return;
 using ::testing::AnyNumber;
 using ::testing::Eq;
-using ::testing::Ref;
 using ::testing::Mock;
 using ::testing::InSequence;
 
