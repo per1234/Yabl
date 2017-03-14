@@ -1,5 +1,6 @@
 Button			KEYWORD1
 Event			KEYWORD1
+EventInfo		KEYWORD1
 
 PRESS			LITERAL1
 RELEASE			LITERAL1
@@ -27,3 +28,6 @@ holdDuration		KEYWORD2
 doubleTapInterval	KEYWORD2
 inverted		KEYWORD2
 callback		KEYWORD2
+
+button			KEYWORD2
+event			KEYWORD2
