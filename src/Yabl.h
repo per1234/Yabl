@@ -181,7 +181,7 @@ public:
    * a press event caused a change in the program's view and the new view should
    * only respond to button events once the current gesture is completed.
    */  
-  void suppressOnce(Event events) { _suppressEvents |= event; }
+  void suppressOnce(Event events) { _suppressEvents |= events; }
   
   /*
    * `holdDuration` is the minimum time a button must be held down to trigger
