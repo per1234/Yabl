@@ -14,5 +14,5 @@ class ButtonCallback
 {
 public:
   MOCK_METHOD0(callbackSimple, void());
-  MOCK_METHOD2(callbackWithEventInfo, void(Button& button, Event event));
+  MOCK_METHOD1(callbackWithEventInfo, void(const EventInfo&));
 };

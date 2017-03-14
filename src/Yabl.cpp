@@ -10,6 +10,11 @@
 
 namespace Yabl {
 
+bool EventInfo::operator==(const EventInfo& other) const {
+  return other.button == button && other.event == event;
+}
+  
+
 bool Button::update() {
   unsigned long elasped = millis() - previousMillis();
 
@@ -87,7 +92,7 @@ void Button::triggerEvent(Event event) {
   Callback* cb = callback(event);
   switch (cb->type) {
     case Callback::SIMPLE: (cb->callback.simple)(); break;
-    case Callback::WITH_BUTTON_AND_EVENT: (cb->callback.withButtonAndEvent)(*this, event); break;
+    case Callback::WITH_EVENT_INFO: (cb->callback.withEventInfo)(EventInfo{*this, event}); break;
     case Callback::NONE: break;
   }
 }
@@ -111,11 +116,11 @@ void Button::callback(CallbackSimple callback, Event forEvents) {
   }
 }
 
-void Button::callback(CallbackWithButtonAndEvent callback, Event forEvents) {
+void Button::callback(CallbackWithEventInfo callback, Event forEvents) {
   for (int i = 0; i < EVENT_COUNT; ++i) {
     if (forEvents & (1 << i)) {
-      _callbacks[i].type = Callback::WITH_BUTTON_AND_EVENT;
-      _callbacks[i].callback.withButtonAndEvent = callback;
+      _callbacks[i].type = Callback::WITH_EVENT_INFO;
+      _callbacks[i].callback.withEventInfo = callback;
     }
   }
 }
