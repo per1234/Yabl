@@ -75,7 +75,7 @@ void setup() {
   button.attach(6, INPUT_PULLUP);
 }
 
-void update() {
+void loop() {
   if (button.update()) {
     // an event was triggered
     if (button.triggered(SINGLE_TAP))
@@ -89,7 +89,7 @@ void update() {
 ```
 `Button` also has two convenience functions for checking if a button was pressed or released:
 ```c++
-void update() {
+void loop() {
   button.update();
   if (button.pressed())
     digitalWrite(LED_BUILTIN, HIGH);
