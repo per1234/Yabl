@@ -57,8 +57,8 @@ void setup() {
   button.callback(onButtonEvent);
 }
 
-void onButtonEvent(Button& button, Event event) {
-  switch (event) {
+void onButtonEvent(const EventInfo& info) {
+  switch (info.event) {
     case SINGLE_TAP: /* ... */ break;
     case DOUBLE_TAP: /* ... */ break;
     case HOLD: /* ... */ break;

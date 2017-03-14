@@ -24,11 +24,21 @@ static constexpr Event LONG_RELEASE = 0x40;
 static constexpr Event USER_EVENT = 0x100;
 static constexpr Event ALL_EVENTS = 0xFFFF;
 
+
+class Button;
+
+struct EventInfo {
+  Button& button;
+  Event event;
+  bool operator==(const EventInfo& other) const;
+};
+
+
 class Button : public Bounce
 {
 public:
   typedef void (*CallbackSimple)();
-  typedef void (*CallbackWithButtonAndEvent)(Button&, Event);
+  typedef void (*CallbackWithEventInfo)(const EventInfo&);
   
   Button() {}
 
@@ -53,7 +63,7 @@ public:
   void inverted(bool inverted) { _inverted = inverted; }
   bool inverted() const { return _inverted; }
   void callback(CallbackSimple callback, Event forEvents);
-  void callback(CallbackWithButtonAndEvent callback, Event forEvents = ALL_EVENTS);
+  void callback(CallbackWithEventInfo callback, Event forEvents = ALL_EVENTS);
 
   bool operator==(const Button& other) const { return this == &other; }
 
@@ -67,11 +77,11 @@ private:
     enum {
       NONE = 0,
       SIMPLE,
-      WITH_BUTTON_AND_EVENT
+      WITH_EVENT_INFO
     } type;
     union {
       CallbackSimple simple;
-      CallbackWithButtonAndEvent withButtonAndEvent;
+      CallbackWithEventInfo withEventInfo;
     } callback;
   };
   
@@ -89,6 +99,7 @@ private:
   Event _suppressEvents = 0;
   Callback _callbacks[EVENT_COUNT];
 };
+
 
 } // namespace Yabl
 

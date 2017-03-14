@@ -12,6 +12,7 @@
 
 using ::testing::Return;
 using ::testing::AnyNumber;
+using ::testing::Eq;
 using ::testing::Ref;
 using ::testing::Mock;
 using ::testing::InSequence;
@@ -65,8 +66,8 @@ protected:
     callbackPtr->callbackSimple();
   }
   
-  static void callbackWithEventInfo(Button& button, Event event) {
-    callbackPtr->callbackWithEventInfo(button, event);
+  static void callbackWithEventInfo(const EventInfo& info) {
+    callbackPtr->callbackWithEventInfo(info);
   }
   
   ButtonCallback callback;
@@ -211,56 +212,56 @@ TEST_F(YablTest, callbacks) {
   button.callback(callbackWithEventInfo);
   
   SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), PRESS));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, PRESS})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 200);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), RELEASE));
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), SHORT_RELEASE));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, RELEASE})));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, SHORT_RELEASE})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 400);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), SINGLE_TAP));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, SINGLE_TAP})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(LOW, 500);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), PRESS));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, PRESS})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 600);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), RELEASE));
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), SHORT_RELEASE));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, RELEASE})));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, SHORT_RELEASE})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(LOW, 700);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), PRESS));
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), DOUBLE_TAP));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, PRESS})));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, DOUBLE_TAP})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 800);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), RELEASE));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, RELEASE})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
 
   SET_PIN_LEVEL_AT_MILLIS(LOW, 900);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), PRESS));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, PRESS})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(LOW, 1300);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), HOLD));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, HOLD})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
   
   SET_PIN_LEVEL_AT_MILLIS(HIGH, 1400);
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), RELEASE));
-  EXPECT_CALL(callback, callbackWithEventInfo(Ref(button), LONG_RELEASE));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, RELEASE})));
+  EXPECT_CALL(callback, callbackWithEventInfo(Eq(EventInfo{button, LONG_RELEASE})));
   EXPECT_TRUE(button.update());
   VERIFY_AND_CLEAR();
 }
