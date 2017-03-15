@@ -5,7 +5,7 @@
  * Copyright 2017 Gino Bollaert
  * MIT License (https://opensource.org/licenses/mit-license.php)
  * -----------------------------------------------------------------------------
- * This example demonstrates how to simply detect press() and release() events.
+ * This example demonstrates how to use simple callbacks for different events.
  * This sketch requires a button be connected to pin `BUTTON_PIN` defined below.
  * The pin is configured to pull-up meaning the button must also be connected to
  * ground.
@@ -16,20 +16,33 @@
 #define BUTTON_PIN 5 // MCU pin connected to button
 
 Button button;
+bool buttonFlash = false;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   button.attach(BUTTON_PIN, INPUT_PULLUP); // button also connected to GND
+  button.callback(onButtonPress, PRESS);
+  button.callback(onButtonRelease, RELEASE);
+  button.callback(onButtonHold, HOLD | DOUBLE_TAP); // called on either event
 }
 
-/*
- * `pressed()` and `released()` will only return `true` if a state change
- * occured since the previous call to `update()`
- */
+void onButtonPress() {
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+void onButtonRelease() {
+  digitalWrite(LED_BUILTIN, LOW);
+  buttonFlash = false;
+}
+
+void onButtonHold() {
+  buttonFlash = true;
+}
+
 void loop() {
-  button.update(); // check for button state changes
-  if (button.pressed()) // `true` if pressed since previous `update()`
-    digitalWrite(LED_BUILTIN, HIGH);
-  else if (button.released()) // `true` if released since previous `update()`
-    digitalWrite(LED_BUILTIN, LOW);
+  /* update both states - callbacks are called from `update()` */
+  button.update();
+  if (buttonFlash) {
+    digitalWrite(LED_BUILTIN, millis() % 50 < 25); // Flash every 50ms
+  }
 }
