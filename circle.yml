@@ -1,8 +1,8 @@
 test:
   pre:
-    - cd extras/tests; make
+    - cd extras/unit_test; make
   override:
-    - ./extras/tests/YablTest
+    - ./extras/unit_test/YablTest
 checkout:
   post:
     - git submodule init
