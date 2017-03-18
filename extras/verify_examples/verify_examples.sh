@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+cd "$(dirname "$0")"
 if [ "$(uname)" == "Darwin" ]; then
-  arduino_root=`pwd`/Arduino/build/macosx/work/Arduino.app/Contents/Java
+  arduino_root=`pwd`/../../cache/Arduino/build/macosx/work/Arduino.app/Contents/Java
 else
-  arduino_root=`pwd`/Arduino/build/linux/work/Arduino.app/Contents/Java
+  arduino_root=`pwd`/../../cache/Arduino/build/linux/work/Arduino.app/Contents/Java
 fi
 
 if [ ! -d $arduino_root ]; then
