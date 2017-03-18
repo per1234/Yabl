@@ -11,7 +11,7 @@ test:
   override:
     - ./extras/unit_test/YablTest
     - ./extras/verify_examples/verify_examples.sh
-    - [[ -e dummy_cache/dummy_file ]] && echo "dummy_cache/dummy_file EXISTS" || echo "dumm_cache/dummy_file DOESN'T EXIST"
+    - if [[ -e dummy_cache/dummy_file ]];then echo "dummy_cache/dummy_file EXISTS";else echo "dumm_cache/dummy_file DOESN'T EXIST";fi
 checkout:
   post:
     - git submodule init
