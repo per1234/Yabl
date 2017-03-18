@@ -2,7 +2,7 @@ dependencies:
   cache_directories:
     - extras/verify_examples/Arduino
   pre:
-    - ls -l extras/verifye_xamples;./extras/verify_examples/install_arduino.sh
+    - ls -l extras/verify_examples;./extras/verify_examples/install_arduino.sh
 test:
   pre:
     - echo `pwd`;cd extras/unit_test; make
