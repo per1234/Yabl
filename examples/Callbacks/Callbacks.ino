@@ -20,7 +20,7 @@ bool buttonFlash = false;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
-  button.attach(BUTTON_PIN, INPUT_PULLUP); // button also connected to GND
+  button.attach(BUTTON_PIN, INPUT_PULLUP); // pin configured to pull-up mode
   button.callback(onButtonPress, PRESS);
   button.callback(onButtonRelease, RELEASE);
   button.callback(onButtonHold, HOLD | DOUBLE_TAP); // called on either event
@@ -43,6 +43,6 @@ void loop() {
   /* update both states - callbacks are called from `update()` */
   button.update();
   if (buttonFlash) {
-    digitalWrite(LED_BUILTIN, millis() % 50 < 25); // Flash every 50ms
+    digitalWrite(LED_BUILTIN, millis() % 80 < 40); // Flash every 80ms
   }
 }

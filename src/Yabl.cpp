@@ -18,28 +18,36 @@ bool EventInfo::operator==(const EventInfo& other) const {
   
 
 bool Button::update() {
+  /* store as `previousMillis()` will be updated in `Bounce::update` */
   unsigned long elasped = millis() - previousMillis();
 
   if (!gestureStarted()) {
-    _suppressEvents = 0;
+    _suppressEvents = 0; // always reset this between gestures
   }
   
+  /* defered reset after a gesture is finished */
   if (_reset) {
     reset();
   }
   
+  /* debounces and stores the state of the button */
   Bounce::update();
 
   clearEvents();
 
   if (pressed()) {
     triggerEvent(PRESS);
-      
+    
+    /*
+     * it is a second press if the button was already released in the current
+     * gesture.
+     */
     if (gestureIncludes(RELEASE) && elasped < _doubleTapInterval) {
       triggerEvent(DOUBLE_TAP);
     }
   }
   else if (released()) {
+    /* ignore the first release if the button was down on initialization */
     if (!gestureStarted()) {
       return false;
     }
@@ -47,28 +55,38 @@ bool Button::update() {
       
     if (gestureIncludes(HOLD)) {
       triggerEvent(LONG_RELEASE);
-      _reset = true;
+      _reset = true; // end of gesture, defer reset to next `update`
     }
     else if (gestureIncludes(DOUBLE_TAP)) {
-      _reset = true;
+      _reset = true; // double-tap gesture ends when the button is released
+      /* do not trigger short or long release events for double-taps */
     }
     else {
       triggerEvent(SHORT_RELEASE);
     }
   }
   else if (down()) {
-    if (gestureStarted() && !gestureIncludes(HOLD) && !gestureIncludes(RELEASE) && elasped >= _holdDuration) {
+    /*
+     * prevent hold events from being retriggered or triggered as part of
+     * double-taps
+     */
+    if (gestureStarted() && !gestureIncludes(HOLD) &&
+        !gestureIncludes(RELEASE) && elasped >= _holdDuration) {
       triggerEvent(HOLD);
     }
   }
   else {
+    /*
+     * single-taps should only be triggered once we know a double-tap can't
+     * occur
+     */
     if (gestureIncludes(PRESS) && elasped >= _doubleTapInterval) {
       triggerEvent(SINGLE_TAP);
-      _reset = true;
+      _reset = true; // end of gesture, defer reset to next `update`
     }
   }
   
-  return activity();
+  return activity(); // return whether any events were triggered
 }
 
 void Button::reset()
@@ -79,12 +97,26 @@ void Button::reset()
   _reset = false;
 }
 
+const char* Button::eventName(Event event) const {
+  switch (event) {
+    case PRESS: return "PRESS";
+    case RELEASE: return "RELEASE";
+    case SHORT_RELEASE: return "SHORT_RELEASE";
+    case SINGLE_TAP: return "SINGLE_TAP";
+    case DOUBLE_TAP: return "DOUBLE_TAP";
+    case HOLD: return "HOLD";
+    case LONG_RELEASE: return "LONG_RELEASE";
+    default: break;
+  }
+  return "<UNKNOWN_EVENT>";
+}
+
 void Button::wakeup() {
-  previous_millis = millis();
+  previous_millis = millis(); // pretend no time has passed when sleeping
 }
 
 void Button::triggerEvent(Event event) {
-  if (_suppressEvents & event) { 
+  if (_suppressEvents & event) {
     return;
   }
   
@@ -123,6 +155,14 @@ void Button::callback(CallbackWithEventInfo callback, Event forEvents) {
     if (forEvents & (1 << i)) {
       _callbacks[i].type = Callback::WITH_EVENT_INFO;
       _callbacks[i].callback.withEventInfo = callback;
+    }
+  }
+}
+
+void Button::noCallback(Event forEvents) {
+  for (int i = 0; i < EVENT_COUNT; ++i) {
+    if (forEvents & (1 << i)) {
+      _callbacks[i].type = Callback::NONE;
     }
   }
 }
