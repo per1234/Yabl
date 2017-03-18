@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-[[ ! -d Arduino ]] || exit 0
+cd "$(dirname "$0")"
+cd ../..
+[[ ! -d cache ]] || exit 0
+mkdir -p cache
+cd cache
 git clone https://github.com/arduino/Arduino.git
 cd Arduino/build
 echo 1.8.2 | ant clean dist
