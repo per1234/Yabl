@@ -1,17 +1,14 @@
 dependencies:
   cache_directories:
-    - extras/verify_examples/Arduino
-    - dummy_cache
+    - cache
   pre:
-    - ls -l extras/verify_examples;cd extras/verify_examples;./install_arduino.sh
-    - if [[ ! -e dummy_cache/dummy_file ]];then mkdir -p dummy_cache;cd dummy_cache;touch dummy_file;echo "CREATED dummy_file";fi
+    - ./extras/verify_examples/install_arduino.sh
 test:
   pre:
-    - echo `pwd`;ls -l;cd extras/unit_test; make
+    - cd extras/unit_test; make
   override:
     - ./extras/unit_test/YablTest
-    - cd extras/verify_examples;./verify_examples.sh
-    - if [[ -e dummy_cache/dummy_file ]];then echo "dummy_cache/dummy_file EXISTS";else echo "dumm_cache/dummy_file DOESN'T EXIST";fi
+    - ./extras/verify_examples/verify_examples.sh
 checkout:
   post:
     - git submodule init
