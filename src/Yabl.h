@@ -10,7 +10,7 @@
 #pragma once
 
 #include <Bounce2.h>
-#include <cinttypes>
+#include <inttypes.h>
 
 /*
  * -----------------------------------------------------------------------------
