@@ -5,11 +5,15 @@
  * Copyright 2017 Gino Bollaert
  * MIT License (https://opensource.org/licenses/mit-license.php)
  * -----------------------------------------------------------------------------
+ * This example demonstrates how to simply detect press() and release() events.
+ * This sketch requires a button be connected to pin `BUTTON_PIN` defined below.
+ * The pin is configured to pull-up meaning the button must also be connected to
+ * ground.
  */
 
 #include <Yabl.h>
 
-#define BUTTON_PIN 6 // <- the board's pin the button is connectd to
+#define BUTTON_PIN 5 // MCU pin connected to button
 
 Button button;
 
@@ -19,14 +23,13 @@ void setup() {
 }
 
 /*
- * pressed() and released() will only return `true` immediately after a state change
- * after update() is called
+ * `pressed()` and `released()` will only return `true` if a state change
+ * occured since the previous call to `update()`
  */
 void loop() {
   button.update(); // check for button state changes
-  if (button.pressed())
+  if (button.pressed()) // `true` if pressed since previous `update()`
     digitalWrite(LED_BUILTIN, HIGH);
-  else if (button.released())
+  else if (button.released()) // `true` if released since previous `update()`
     digitalWrite(LED_BUILTIN, LOW);
 }
-

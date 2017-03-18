@@ -10,7 +10,7 @@
 #pragma once
 
 #include <Bounce2.h>
-#include <cinttypes>
+#include <inttypes.h>
 
 /*
  * -----------------------------------------------------------------------------
@@ -28,21 +28,33 @@ namespace Yabl {
 typedef uint16_t Event;
 
 /* pressed */
-static constexpr Event PRESS = 0x01;
+static constexpr Event PRESS = 0x0001;
 /* released */
-static constexpr Event RELEASE = 0x02;
+static constexpr Event RELEASE = 0x0002;
 /* released before `holdDuration` */
-static constexpr Event SHORT_RELEASE = 0x04;
+static constexpr Event SHORT_RELEASE = 0x0004;
 /* relased (short) and not pressed again before `doubleTapInterval` */
-static constexpr Event SINGLE_TAP = 0x08;
+static constexpr Event SINGLE_TAP = 0x0008;
 /* elased (short) and pressed again within `doubleTapInterval` */
-static constexpr Event DOUBLE_TAP = 0x10;
+static constexpr Event DOUBLE_TAP = 0x0010;
 /* pressed and held for `holdDuration` */
-static constexpr Event HOLD = 0x20;           
+static constexpr Event HOLD = 0x0020;
 /* relased after being held for at least `holdDuration` */
-static constexpr Event LONG_RELEASE = 0x40;
-/* additional events for subclasses can start here */
-static constexpr Event USER_EVENT = 0x100;
+static constexpr Event LONG_RELEASE = 0x0040;
+
+/* the following events are reserved for future functionality */
+static constexpr Event EVENT_RESERVED_0x0080 = 0x0080;
+static constexpr Event EVENT_RESERVED_0x0100 = 0x0100;
+static constexpr Event EVENT_RESERVED_0x0200 = 0x0200;
+
+/* these are additional events available to subclasses */
+static constexpr Event EVENT_EXTENDED_1 = 0x0400;
+static constexpr Event EVENT_EXTENDED_2 = 0x0800;
+static constexpr Event EVENT_EXTENDED_3 = 0x1000;
+static constexpr Event EVENT_EXTENDED_4 = 0x2000;
+static constexpr Event EVENT_EXTENDED_5 = 0x4000;
+static constexpr Event EVENT_EXTENDED_6 = 0x8000;
+
 /* mask for all events */
 static constexpr Event ALL_EVENTS = 0xFFFF;
 
@@ -109,10 +121,15 @@ public:
   bool update();
   
   /*
-   * This resets any current events, events recorded in the current gesture and
+   * This resets any current events, events recorded in the previous gesture and
    * supressed events.
    */
   void reset();
+  
+  /*
+   * This returns the name of the event for debugging purposes.
+   */
+  virtual const char* eventName(Event event) const;
   
   /*
    * Call `sleep()` before putting the MCU to sleep to prevent false event
@@ -210,8 +227,9 @@ public:
   /*
    * Callbacks with signiture `CallbackSimple` have no arguments and are
    * typically used when there is one button and seperate callbacks per-event.
-   * Multiple events can be linked to the same callback by combining events
-   * using the bit-wise OR operator. For example:
+   * There can only be one callback per event however multiple events can be
+   * linked to the same callback by combining events using the bit-wise OR
+   * operator. For example:
    *
    *   void setup() {
    *     ...
@@ -237,11 +255,16 @@ public:
   /*
    * A callback with signiture `CallbackWithEventInfo` has one argument which
    * holds information on which button the events occured on and the type of
-   * event triggered. This callback is useful for dealing with different
-   * buttons and event types in a dynamic way. For example:
+   * event triggered. There can only be one callback per event however multiple
+   * events can be linked to the same callback by combining events using the
+   * bit-wise OR operator. The `forEvents` parameter is optional and set to
+   * set to trigger the callback on all events if left unspecified. This
+   * callback is useful for dealing with different buttons and event types in a
+   * dynamic way. For example:
+   
    *   Button buttonA;
    *   Button buttonB;
-   
+   *
    *   void setup() {
    *     ...
    *     buttonA.callback(onButtonEvent);
@@ -250,18 +273,7 @@ public:
    *   
    *   void onButtonEvent(const EventInfo& info) {
    *     Serial.print(info.button == buttonA ?  "Button A: " : "Button B: ");
-   *
-   *     switch (info.event) {
-   *       case PRESS: Serial.println("PRESS"); break;
-   *       case RELEASE: Serial.println("RELEASE"); break;
-   *       case SHORT_RELEASE: Serial.println("SHORT_RELEASE"); break;
-   *       case SINGLE_TAP: Serial.println("SINGLE_TAP"); break;
-   *       case DOUBLE_TAP: Serial.println("DOUBLE_TAP"); break;
-   *       case HOLD: Serial.println("HOLD"); break;
-   *       case LONG_RELEASE: Serial.println("LONG_RELEASE"); break;
-   *       case USER_EVENT: Serial.println("EXCLUSIVE_PRESS"); break;
-   *       default: break;
-   *     }
+   *     Serial.println(info.button.eventName(info.event));
    *   }
    *   
    *   void loop() {
@@ -271,6 +283,11 @@ public:
    */
   void callback(CallbackWithEventInfo callback, Event forEvents = ALL_EVENTS);
 
+  /*
+   * Deregister callbacks for events `forEvents`.
+   */
+  void noCallback(Event forEvents = ALL_EVENTS);
+  
   /*
    * See if two button variables are the same instance. See example above.
    */
@@ -288,7 +305,17 @@ protected:
    */
   unsigned long previousMillis() const { return previous_millis; }
   
+  /*
+   * The maximum number of event types. See comments on the `Event` typedef
+   * above.
+   */
+  static constexpr int EVENT_COUNT = sizeof(Event) * 8;
+  
 private:
+  /*
+   * The folowing struct stores a callback of type `CallbackSimple` or
+   * `CallbackWithEventInfo`.
+   */
   struct Callback {
     Callback() : type(NONE) {}
     enum {
@@ -302,18 +329,24 @@ private:
     } callback;
   };
   
+  /*
+   * Old events are cleared at the start of every `update`.
+   */
   void clearEvents() { _currentEvents = 0; }
+  
+  /*
+   * Finds the pointer to the callback data associated with the event
+   * `forEvent`.
+   */
   Callback* callback(Event forEvent);
 
-  static constexpr int EVENT_COUNT = sizeof(Event) * 8;
-
-  bool _inverted = true;
+  bool _inverted = true; // is the pin `LOW` when the button is down
   unsigned int _holdDuration = 400;
   unsigned int _doubleTapInterval = 150;
-  bool _reset = false;
-  Event _currentEvents = 0;
-  Event _gestureEvents = 0;
-  Event _suppressEvents = 0;
+  bool _reset = false; // used to delay a reset until the following `update`
+  Event _currentEvents = 0; // events triggered between updates
+  Event _gestureEvents = 0; // events triggered since the start of a gesture
+  Event _suppressEvents = 0; // events to be suppressed until the next gesture
   Callback _callbacks[EVENT_COUNT];
 };
 
