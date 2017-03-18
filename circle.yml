@@ -2,13 +2,13 @@ dependencies:
   cache_directories:
     - extras/verify_examples/Arduino
   pre:
-    - ./install_arduino.sh
+    - ./extras/verify_examples/install_arduino.sh
 test:
   pre:
     - cd extras/unit_test; make
   override:
     - ./extras/unit_test/YablTest
-    - ./verify_examples.sh
+    - ./extras/verify_examples/verify_examples.sh
 checkout:
   post:
     - git submodule init
