@@ -62,7 +62,10 @@ bool Button::update() {
       /* do not trigger short or long release events for double-taps */
     }
     else {
-      triggerEvent(SHORT_RELEASE);
+      if (enableHold()) {
+        triggerEvent(SHORT_RELEASE);
+      }
+
       if (!enableDoubleTap()) {
         /* no need to wait until doubleTapInterval to trigger single tap */
         triggerEvent(SINGLE_TAP);
@@ -75,7 +78,7 @@ bool Button::update() {
      * prevent hold events from being retriggered or triggered as part of
      * double-taps
      */
-    if (gestureStarted() && !gestureIncludes(HOLD) &&
+    if (gestureStarted() && enableHold() && !gestureIncludes(HOLD) &&
         !gestureIncludes(RELEASE) && elasped >= _holdDuration) {
       triggerEvent(HOLD);
     }
@@ -136,12 +139,12 @@ void Button::triggerEvent(Event event) {
   }
 }
   
-void Button::enableDoubleTap(bool enable) {
+void Button::enableEvent(Event event, bool enable) {
   if (enable) {
-    _suppressAlways &= ~DOUBLE_TAP;    
+    _suppressAlways &= ~event;    
   }
   else {
-    _suppressAlways |= DOUBLE_TAP;
+    _suppressAlways |= event;
   }
 }
 

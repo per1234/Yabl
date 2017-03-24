@@ -207,8 +207,8 @@ public:
    * `false`, SINGLE_TAP events occur immediately on release rather than waiting
    * on the possibility of a double-tap occuring. This is `true` by default.
    */
-  void enableDoubleTap(bool enable);
-  bool enableDoubleTap() const { return !(_suppressAlways & DOUBLE_TAP); }
+  void enableDoubleTap(bool enable) { enableEvent(DOUBLE_TAP, enable); }
+  bool enableDoubleTap() const { return eventEnabled(DOUBLE_TAP); }
   
   /*
    * `doubleTapInterval` is the maximum time interval between a first release
@@ -216,6 +216,12 @@ public:
    */
   void doubleTapInterval(unsigned int ms) { _doubleTapInterval = ms; }
   unsigned int doubleTapInterval() const { return _doubleTapInterval; }
+  
+  /*
+   *
+   */
+  void enableHold(bool enable) { enableEvent(HOLD, enable); }
+  bool enableHold() const { return eventEnabled(HOLD); }
   
   /*
    * `holdDuration` is the minimum time a button must be held down to trigger
@@ -344,6 +350,12 @@ private:
    */
   void clearEvents() { _currentEvents = 0; }
   
+  /*
+   *
+   */
+  void enableEvent(Event event, bool enable);
+  bool eventEnabled(Event event) const { return !(_suppressAlways & event); }
+
   /*
    * Finds the pointer to the callback data associated with the event
    * `forEvent`.
