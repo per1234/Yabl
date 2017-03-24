@@ -198,14 +198,17 @@ public:
    * a press event caused a change in the program's view and the new view should
    * only respond to button events once the current gesture is completed.
    */  
-  void suppressOnce(Event events) { _suppressEvents |= events; }
+  void suppressOnce(Event events) { _suppressOnce |= events; }
   
   /*
-   * `holdDuration` is the minimum time a button must be held down to trigger
-   * a HOLD event.
+   * When `enableDoubleTap` is `true`, a DOUBLE_TAP event will be triggered if
+   * the button is pressed twice with the second press occuring within
+   * `doubleTapInterval` after the first release. When `enableDoubleTap` is
+   * `false`, SINGLE_TAP events occur immediately on release rather than waiting
+   * on the possibility of a double-tap occuring. This is `true` by default.
    */
-  void holdDuration(unsigned int ms) { _holdDuration = ms; }
-  unsigned int holdDuration() const { return _holdDuration; }
+  void enableDoubleTap(bool enable);
+  bool enableDoubleTap() const { return !(_suppressAlways & DOUBLE_TAP); }
   
   /*
    * `doubleTapInterval` is the maximum time interval between a first release
@@ -213,6 +216,13 @@ public:
    */
   void doubleTapInterval(unsigned int ms) { _doubleTapInterval = ms; }
   unsigned int doubleTapInterval() const { return _doubleTapInterval; }
+  
+  /*
+   * `holdDuration` is the minimum time a button must be held down to trigger
+   * a HOLD event.
+   */
+  void holdDuration(unsigned int ms) { _holdDuration = ms; }
+  unsigned int holdDuration() const { return _holdDuration; }
   
   /*
    * `inverted` is `true` by default signifying that the pin reads `HIGH` when
@@ -346,7 +356,8 @@ private:
   bool _reset = false; // used to delay a reset until the following `update`
   Event _currentEvents = 0; // events triggered between updates
   Event _gestureEvents = 0; // events triggered since the start of a gesture
-  Event _suppressEvents = 0; // events to be suppressed until the next gesture
+  Event _suppressOnce = 0; // events to be suppressed until the next gesture
+  Event _suppressAlways = 0; // events which are always disabled
   Callback _callbacks[EVENT_COUNT];
 };
 

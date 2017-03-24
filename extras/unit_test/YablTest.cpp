@@ -162,6 +162,27 @@ TEST_F(YablTest, singleTapEvent) {
 }
 
 
+TEST_F(YablTest, singleTapEventNoDoubleTap) {
+  button.enableDoubleTap(false);
+  EXPECT_FALSE(button.enableDoubleTap());
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(PRESS);
+  VERIFY_AND_CLEAR();
+  
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 200);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(RELEASE | SHORT_RELEASE | SINGLE_TAP);
+  VERIFY_AND_CLEAR();
+  
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 400);
+  EXPECT_FALSE(button.update());
+  EXPECT_EVENTS(0);
+  VERIFY_AND_CLEAR();
+}
+
+
 TEST_F(YablTest, doubleTapEvent) {
   SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
   EXPECT_TRUE(button.update());

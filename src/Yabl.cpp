@@ -22,7 +22,7 @@ bool Button::update() {
   unsigned long elasped = millis() - previousMillis();
 
   if (!gestureStarted()) {
-    _suppressEvents = 0; // always reset this between gestures
+    _suppressOnce = _suppressAlways; // always reset this between gestures
   }
   
   /* defered reset after a gesture is finished */
@@ -63,6 +63,11 @@ bool Button::update() {
     }
     else {
       triggerEvent(SHORT_RELEASE);
+      if (!enableDoubleTap()) {
+        /* no need to wait until doubleTapInterval to trigger single tap */
+        triggerEvent(SINGLE_TAP);
+        _reset = true; // end of gesture, defer reset to next `update`
+      }
     }
   }
   else if (down()) {
@@ -93,7 +98,7 @@ void Button::reset()
 {
   _currentEvents = 0;
   _gestureEvents = 0;
-  _suppressEvents = 0;
+  _suppressOnce = 0;
   _reset = false;
 }
 
@@ -116,7 +121,7 @@ void Button::wakeup() {
 }
 
 void Button::triggerEvent(Event event) {
-  if (_suppressEvents & event) {
+  if (_suppressOnce & event) {
     return;
   }
   
@@ -131,6 +136,15 @@ void Button::triggerEvent(Event event) {
   }
 }
   
+void Button::enableDoubleTap(bool enable) {
+  if (enable) {
+    _suppressAlways &= ~DOUBLE_TAP;    
+  }
+  else {
+    _suppressAlways |= DOUBLE_TAP;
+  }
+}
+
 Button::Callback* Button::callback(Event forEvent) {
   for (int i = 0; i < EVENT_COUNT; ++i) {
     if (forEvent & (1 << i)) {
