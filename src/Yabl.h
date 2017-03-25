@@ -218,7 +218,9 @@ public:
   unsigned int doubleTapInterval() const { return _doubleTapInterval; }
   
   /*
-   *
+   * `enableHold` sets whether HOLD, SHORT_RELEASE and LONG_RELEASE events can
+   * can be triggered. When `false`, the button can be held for any length of
+   * time to trigger SINGLE_TAP or DOUBLE_TAP events. This is `true` by default.
    */
   void enableHold(bool enable) { enableEvent(HOLD, enable); }
   bool enableHold() const { return eventEnabled(HOLD); }
@@ -351,7 +353,7 @@ private:
   void clearEvents() { _currentEvents = 0; }
   
   /*
-   *
+   * Enable and disable certain type of events.
    */
   void enableEvent(Event event, bool enable);
   bool eventEnabled(Event event) const { return !(_suppressAlways & event); }
