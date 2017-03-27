@@ -78,9 +78,17 @@ bool Button::update() {
      * prevent hold events from being retriggered or triggered as part of
      * double-taps
      */
-    if (gestureStarted() && enableHold() && !gestureIncludes(HOLD) &&
-        !gestureIncludes(RELEASE) && elasped >= _holdDuration) {
-      triggerEvent(HOLD);
+    if (gestureStarted() && enableHold() && !gestureIncludes(RELEASE)) {
+      if (!gestureIncludes(HOLD)) {
+        if (elasped >= _holdDuration) {
+          triggerEvent(HOLD);
+          _nextHoldRepeat = _holdDuration + validatedHoldRepeatDelay();
+        }
+      }
+      else if (elasped >= _nextHoldRepeat) {
+        triggerEvent(HOLD_REPEAT);
+        _nextHoldRepeat += _holdRepeatInterval;
+      }
     }
   }
   else {
