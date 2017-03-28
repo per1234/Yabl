@@ -242,8 +242,8 @@ public:
   unsigned short holdRepeatDelay() const { return _holdRepeatDelay; }
 
   /*
-   * `holdRepeatInterval` is the minimum time a button must be held down to trigger
-   * a HOLD event.
+   * `holdRepeatInterval` is the minimum time a button must be held down to
+   * trigger a HOLD event.
    */
   void holdRepeatInterval(unsigned short ms) { _holdRepeatInterval = ms; }
   unsigned short holdRepeatInterval() const { return _holdRepeatInterval; }
