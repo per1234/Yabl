@@ -162,6 +162,63 @@ TEST_F(YablTest, singleTapEvent) {
 }
 
 
+TEST_F(YablTest, singleTapEventNoDoubleTap) {
+  button.enableDoubleTap(false);
+  EXPECT_FALSE(button.enableDoubleTap());
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(PRESS);
+  VERIFY_AND_CLEAR();
+  
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 200);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(RELEASE | SHORT_RELEASE | SINGLE_TAP);
+  VERIFY_AND_CLEAR();
+  
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 400);
+  EXPECT_FALSE(button.update());
+  EXPECT_EVENTS(0);
+  VERIFY_AND_CLEAR();
+}
+
+
+TEST_F(YablTest, singleTapEventNoHold) {
+  button.enableHold(false);
+  EXPECT_FALSE(button.enableHold());
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(PRESS);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 300);
+  EXPECT_FALSE(button.update());
+  EXPECT_EVENTS(0);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 500);
+  EXPECT_FALSE(button.update());
+  EXPECT_EVENTS(0);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 700);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(RELEASE);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 800);
+  EXPECT_FALSE(button.update());
+  EXPECT_EVENTS(0);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 900);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(SINGLE_TAP);
+  VERIFY_AND_CLEAR();
+}
+
+
 TEST_F(YablTest, doubleTapEvent) {
   SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
   EXPECT_TRUE(button.update());
@@ -206,6 +263,50 @@ TEST_F(YablTest, holdEvent) {
   EXPECT_EVENTS(RELEASE | LONG_RELEASE);
   VERIFY_AND_CLEAR();
 }
+
+
+TEST_F(YablTest, holdRepeatEvent) {
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 100);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(PRESS);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 300);
+  EXPECT_FALSE(button.update());
+  EXPECT_EVENTS(0);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 500);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(HOLD);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 700);
+  EXPECT_FALSE(button.update());
+  EXPECT_EVENTS(0);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 900);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(HOLD_REPEAT);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 1050);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(HOLD_REPEAT);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(LOW, 1200);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(HOLD_REPEAT);
+  VERIFY_AND_CLEAR();
+
+  SET_PIN_LEVEL_AT_MILLIS(HIGH, 1350);
+  EXPECT_TRUE(button.update());
+  EXPECT_EVENTS(RELEASE | LONG_RELEASE);
+  VERIFY_AND_CLEAR();
+}
+
 
 TEST_F(YablTest, callbacks) {
   InSequence dummy;

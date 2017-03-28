@@ -31,29 +31,31 @@ typedef uint16_t Event;
 static constexpr Event PRESS = 0x0001;
 /* released */
 static constexpr Event RELEASE = 0x0002;
-/* released before `holdDuration` */
-static constexpr Event SHORT_RELEASE = 0x0004;
 /* relased (short) and not pressed again before `doubleTapInterval` */
-static constexpr Event SINGLE_TAP = 0x0008;
+static constexpr Event SINGLE_TAP = 0x0004;
 /* elased (short) and pressed again within `doubleTapInterval` */
-static constexpr Event DOUBLE_TAP = 0x0010;
+static constexpr Event DOUBLE_TAP = 0x0008;
 /* pressed and held for `holdDuration` */
-static constexpr Event HOLD = 0x0020;
+static constexpr Event HOLD = 0x0010;
+/* pressed and held for `holdDuration` + `holdRepeatDelay` and every
+   `holdRepeatInterval` after that. */
+static constexpr Event HOLD_REPEAT = 0x0020;
+/* released before `holdDuration` */
+static constexpr Event SHORT_RELEASE = 0x0040;
 /* relased after being held for at least `holdDuration` */
-static constexpr Event LONG_RELEASE = 0x0040;
+static constexpr Event LONG_RELEASE = 0x0080;
 
 /* the following events are reserved for future functionality */
-static constexpr Event EVENT_RESERVED_0x0080 = 0x0080;
 static constexpr Event EVENT_RESERVED_0x0100 = 0x0100;
 static constexpr Event EVENT_RESERVED_0x0200 = 0x0200;
+static constexpr Event EVENT_RESERVED_0x0400 = 0x0400;
+static constexpr Event EVENT_RESERVED_0x0800 = 0x0800;
 
 /* these are additional events available to subclasses */
-static constexpr Event EVENT_EXTENDED_1 = 0x0400;
-static constexpr Event EVENT_EXTENDED_2 = 0x0800;
-static constexpr Event EVENT_EXTENDED_3 = 0x1000;
-static constexpr Event EVENT_EXTENDED_4 = 0x2000;
-static constexpr Event EVENT_EXTENDED_5 = 0x4000;
-static constexpr Event EVENT_EXTENDED_6 = 0x8000;
+static constexpr Event EVENT_EXTENDED_1 = 0x1000;
+static constexpr Event EVENT_EXTENDED_2 = 0x2000;
+static constexpr Event EVENT_EXTENDED_3 = 0x4000;
+static constexpr Event EVENT_EXTENDED_4 = 0x8000;
 
 /* mask for all events */
 static constexpr Event ALL_EVENTS = 0xFFFF;
@@ -198,22 +200,54 @@ public:
    * a press event caused a change in the program's view and the new view should
    * only respond to button events once the current gesture is completed.
    */  
-  void suppressOnce(Event events) { _suppressEvents |= events; }
+  void suppressOnce(Event events) { _suppressOnce |= events; }
   
   /*
-   * `holdDuration` is the minimum time a button must be held down to trigger
-   * a HOLD event.
+   * When `enableDoubleTap` is `true`, a DOUBLE_TAP event will be triggered if
+   * the button is pressed twice with the second press occuring within
+   * `doubleTapInterval` after the first release. When `enableDoubleTap` is
+   * `false`, SINGLE_TAP events occur immediately on release rather than waiting
+   * on the possibility of a double-tap occuring. This is `true` by default.
    */
-  void holdDuration(unsigned int ms) { _holdDuration = ms; }
-  unsigned int holdDuration() const { return _holdDuration; }
+  void enableDoubleTap(bool enable) { enableEvent(DOUBLE_TAP, enable); }
+  bool enableDoubleTap() const { return eventEnabled(DOUBLE_TAP); }
   
   /*
    * `doubleTapInterval` is the maximum time interval between a first release
    * and the second press to trigger a DOUBLE_TAP event.
    */
-  void doubleTapInterval(unsigned int ms) { _doubleTapInterval = ms; }
-  unsigned int doubleTapInterval() const { return _doubleTapInterval; }
+  void doubleTapInterval(unsigned short ms) { _doubleTapInterval = ms; }
+  unsigned short doubleTapInterval() const { return _doubleTapInterval; }
   
+  /*
+   * `enableHold` sets whether HOLD, SHORT_RELEASE and LONG_RELEASE events can
+   * can be triggered. When `false`, the button can be held for any length of
+   * time to trigger SINGLE_TAP or DOUBLE_TAP events. This is `true` by default.
+   */
+  void enableHold(bool enable) { enableEvent(HOLD, enable); }
+  bool enableHold() const { return eventEnabled(HOLD); }
+  
+  /*
+   * `holdDuration` is the minimum time a button must be held down to trigger
+   * a HOLD event.
+   */
+  void holdDuration(unsigned short ms) { _holdDuration = ms; }
+  unsigned short holdDuration() const { return _holdDuration; }
+  
+  /*
+   * `holdRepeatDelay` is the interval between the HOLD event and the first
+   * HOLD_REPEAT event.
+   */
+  void holdRepeatDelay(unsigned short ms) { _holdRepeatDelay = ms; }
+  unsigned short holdRepeatDelay() const { return _holdRepeatDelay; }
+
+  /*
+   * `holdRepeatInterval` is the minimum time a button must be held down to
+   * trigger a HOLD event.
+   */
+  void holdRepeatInterval(unsigned short ms) { _holdRepeatInterval = ms; }
+  unsigned short holdRepeatInterval() const { return _holdRepeatInterval; }
+
   /*
    * `inverted` is `true` by default signifying that the pin reads `HIGH` when
    * the button is released and `LOW` when it is pressed down. This supports
@@ -335,18 +369,37 @@ private:
   void clearEvents() { _currentEvents = 0; }
   
   /*
+   * Enable and disable certain type of events.
+   */
+  void enableEvent(Event event, bool enable);
+  bool eventEnabled(Event event) const { return !(_suppressAlways & event); }
+
+  /*
    * Finds the pointer to the callback data associated with the event
    * `forEvent`.
    */
   Callback* callback(Event forEvent);
 
+  /*
+   * This method insures the interval between a `HOLD` event and `HOLD_REPEAT`
+   * event is never smaller than the intetval between `HOLD_REPEAT` events.
+   */
+  unsigned int validatedHoldRepeatDelay() const {
+    return _holdRepeatDelay < _holdRepeatInterval ? _holdRepeatInterval :
+                                                    _holdRepeatDelay;
+  }
+
   bool _inverted = true; // is the pin `LOW` when the button is down
-  unsigned int _holdDuration = 400;
-  unsigned int _doubleTapInterval = 150;
+  unsigned short _doubleTapInterval = 150;
+  unsigned short _holdDuration = 400;
+  unsigned short _holdRepeatDelay = 400; // after hold duration
+  unsigned short _holdRepeatInterval = 150; // after hold repeat delay
+  unsigned long _nextHoldRepeat = 0;
   bool _reset = false; // used to delay a reset until the following `update`
   Event _currentEvents = 0; // events triggered between updates
   Event _gestureEvents = 0; // events triggered since the start of a gesture
-  Event _suppressEvents = 0; // events to be suppressed until the next gesture
+  Event _suppressOnce = 0; // events to be suppressed until the next gesture
+  Event _suppressAlways = 0; // events which are always disabled
   Callback _callbacks[EVENT_COUNT];
 };
 
