@@ -18,6 +18,7 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::InSequence;
 
+
 class YablTest : public ::testing::Test
 {
 protected:
