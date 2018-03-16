@@ -15,7 +15,7 @@
 /*
  * -----------------------------------------------------------------------------
  * The Yabl namespace prevents name colisions with other possible Button and
- * Event classed.
+ * Event classes.
  */
 namespace Yabl {
 
@@ -87,7 +87,7 @@ struct EventInfo {
  *   Button button;
  *
  *   // Specify the pin the button is attached to using the `Bounce` method
- *   //`attach(...):
+ *   //`attach(...)`:
  *   void setup() {
  *     button.attach(6, INPUT_PULLUP); // button attached to pin 6 and ground
  *   }
@@ -409,6 +409,6 @@ private:
 /*
  * The following line is for user convenience when declaring objects of type
  * `Button`, `Event` and `EventInfo`. Users will need to prefix these with
- * `Yabl::` if these name conflict with other classes sharing the same name. 
+ * `Yabl::` if these names conflict with other classes sharing the same name. 
  */
 using namespace Yabl;
