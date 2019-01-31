@@ -11,6 +11,15 @@ if [ ! -d $arduino_root ]; then
   exit 1
 fi
 
+cd libraries
+if [ ! -d Yabl ]; then
+  mkdir -p Yabl && cd Yabl
+  ln -s ../../../../src/ .
+  ln -s ../../../../examples/ .
+  cd ..
+fi
+cd ..
+
 build_root=`pwd`/build
 exit_code=0
 for sketch in `find ../../examples -name '*.ino'`
