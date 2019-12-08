@@ -12,6 +12,16 @@
 #include <Bounce2.h>
 #include <inttypes.h>
 
+#if __cplusplus <= 199711L
+
+#define static_assert(expression, message)
+#define constexpr const
+
+#else
+
+// things that we can turn on if we're in a C++11 environment
+#endif
+
 /*
  * -----------------------------------------------------------------------------
  * The Yabl namespace prevents name colisions with other possible Button and
